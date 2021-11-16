@@ -1,23 +1,24 @@
-# This config is equivalent to both the '.circleci/extended/orb-free.yml' and the base '.circleci/config.yml'
 version: 2.1
-
-# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
-# See: https://circleci.com/docs/2.0/orb-intro/
-orbs:
-  macos: circleci/macos@2.0.1
-
-jobs:
-  example-job:
+executors:
+  my-custom-executor:
     docker:
-      # replace with your preferred image
       - image: cimg/base:stable
+      
+jobs:
+  job-1:
+
+    executor: my-custom-executor
     steps:
-      - macos/preboot-simulator:
-          device: iPhone 13 
-          platform: iOS 
-          version: '15.1' 
+      - checkout
+      - run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+          export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          nvm install 17.1.0
+          npm install expo-cli
+          expo build:ios
 
 workflows:
-  example-workflow:
+  my-custom-workflow:
     jobs:
-      - example-job
+      - job-1
